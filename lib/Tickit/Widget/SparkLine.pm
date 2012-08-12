@@ -252,13 +252,17 @@ sub char_for_value {
 	return $self->graph_steps->[$item * $range / $self->max_value];
 }
 
+=head2 max_value
+
+Returns the maximum value seen so far, used for autoscaling.
+
+=cut
+
 sub max_value {
 	my $self = shift;
 	return $self->{max_value} if exists $self->{max_value};
 	return $self->{max_value} = max($self->data);
 }
-
-sub resize { }
 
 1;
 
