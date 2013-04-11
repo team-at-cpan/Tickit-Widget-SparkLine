@@ -7,7 +7,7 @@ use POSIX qw(floor);
 use List::Util qw(max);
 use Tickit::Utils qw(textwidth);
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ Pass either an array or an arrayref to set the data values and request display r
 sub data {
 	my $self = shift;
 	if(@_) {
-		$self->{data} = [ reftype($_[0]) eq 'ARRAY' ? @{$_[0]} : @_ ];
+		$self->{data} = [ (ref($_[0]) && reftype($_[0]) eq 'ARRAY') ? @{$_[0]} : @_ ];
 		delete $self->{max_value};
 		$self->resized;
 	}
