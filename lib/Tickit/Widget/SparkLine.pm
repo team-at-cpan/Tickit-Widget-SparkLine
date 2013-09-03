@@ -8,7 +8,7 @@ use Scalar::Util qw(reftype);
 use List::Util qw(max sum min);
 use Tickit::Utils qw(textwidth);
 
-our $VERSION = '0.003';
+our $VERSION = '0.100';
 
 =head1 NAME
 
@@ -252,7 +252,7 @@ Rendering implementation. Uses L</graph_steps> as the base character set.
 =cut
 
 sub render_to_rb {
-	my ($self, $rb, $rect) = @_;
+	my ($self, $rb) = @_;
 	my $win = $self->window or return;
 	$rb->clear;
 
