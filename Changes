@@ -1,5 +1,13 @@
 {{$NEXT}}
-	Avoid undef warnings with ->data(1,2,3)
+	Features:
+	* Scale to fit when datapoints won't all fit in the window
+	* Switched to Tickit::RenderBuffer
+
+	API changes:
+	* char_for_value - this now returns the Unicode codepoint, rather than the character itself.
+
+	Bug fixes:
+	* Avoid undef warnings with ->data(1,2,3).
 
 0.002     2011-11-27 05:44:43 Europe/London
 	Initial CPAN release

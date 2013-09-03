@@ -4,7 +4,8 @@ use strict;
 use warnings;
 use parent qw(Tickit::Widget);
 use POSIX qw(floor);
-use List::Util qw(max);
+use Scalar::Util qw(reftype);
+use List::Util qw(max sum min);
 use Tickit::Utils qw(textwidth);
 
 our $VERSION = '0.003';
@@ -27,16 +28,18 @@ Generates a mini ("sparkline") graph.
 
 =cut
 
+use Tickit::Style;
+
+style_definition base =>
+	fg => 'white';
+
 =head1 METHODS
 
 =cut
 
 sub lines { 1 }
 
-sub cols {
-	my $self = shift;
-	return textwidth($self->data_chars);
-}
+sub cols { 1 }
 
 =head2 new
 
@@ -192,17 +195,55 @@ characters you provide in this arrayref.
 =cut
 
 sub graph_steps { [
-	" ",
-	"_",
-	"\x{2581}",
-	"\x{2582}",
-	"\x{2583}",
-	"\x{2584}",
-	"\x{2585}",
-	"\x{2586}",
-	"\x{2587}",
-	"\x{2588}"
+	ord " ",
+	0x2581,
+	0x2582,
+	0x2583,
+	0x2584,
+	0x2585,
+	0x2586,
+	0x2587,
+	0x2588
 ] }
+
+=head2 resample
+
+Given a width $w, resamples the data (remaining list of
+parameters) to fit, using the current L</resample_method>.
+
+Used internally.
+
+=cut
+
+sub resample {
+	my $self = shift;
+	my ($total_width, @data) = @_;
+	my $xdelta = $total_width / @data;
+	my $x = 0;
+	my @v;
+	my @out;
+	my $mode = {
+		average => sub { sum(@_) / @_ },
+		mean => sub { sum(@_) / @_ },
+		median => sub {
+			my @sorted = sort { $a <=> $b } @_;
+			(@sorted % 2) ? $sorted[@_ / 2] : (sum(@sorted[@_ / 2, 1 + @_ / 2]) / 2) },
+		peak => sub { max @_ },
+		min => sub { min @_ },
+		max => sub { max @_ },
+	}->{$self->resample_mode} or die 'bad resample mode: ' . $self->resample_mode;
+
+	for (@data) {
+		my $last_x = $x;
+		$x += $xdelta;
+		push @v, $_;
+		if(floor($x) - floor($last_x)) {
+			push @out, $mode->(@v);
+			@v = ();
+		}
+	}
+	@out;
+}
 
 =head2 render
 
@@ -210,38 +251,45 @@ Rendering implementation. Uses L</graph_steps> as the base character set.
 
 =cut
 
-sub render {
-	my $self = shift;
+sub render_to_rb {
+	my ($self, $rb, $rect) = @_;
 	my $win = $self->window or return;
+	$rb->clear;
 
+	my @data = @{$self->{data}};
 	my $total_width = $win->cols;
-	my $w = $total_width / (@{$self->{data}} || 1);
+	my $w = $total_width / (@data || 1);
 	my $floored_w = floor $w;
 
-# Apply minimum per-cell width of 1 char
+	# Apply minimum per-cell width of 1 char, and resample data to fit
 	unless($floored_w) {
 		$w = 1;
 		$floored_w = 1;
+		@data = $self->resample($total_width => @data);
 	}
 
+	my $win_height = $win->lines;
 	my $x = 0;
-	foreach my $item ($self->data) {
-		$win->goto(0, floor($x));
-		$win->print($self->char_for_value($item) x $floored_w);
+	my $range = $#{$self->graph_steps};
+	my $fg_pen = $self->get_style_pen;
+	my $bg_pen = Tickit::Pen->new(bg => $fg_pen->getattr('fg'));
+	foreach my $item (@data) {
+		my $v = $item * $win_height / $self->max_value;
+		my $top = $win_height - floor( $v);
+		my $left = floor(0.5 + $x);
+		my $bar_width = (floor(0.5 + $x + $w) - $left);
+		for my $y ($top .. $win_height) {
+			$rb->erase_at($y, $left, $bar_width, $bg_pen);
+		}
+		my $ch = $self->graph_steps->[floor(0.5 + $range * ($v - floor($v)))];
+		$rb->char_at($top - 1, $left + $_, $ch, $fg_pen) for 0..$bar_width-1;
 		$x += $w;
-		last if floor($x) >= ($win->cols - 1);
-	}
-
-# Clear any remaining lines if we have any
-	for my $line (1 .. $win->lines - 1) {
-		$win->goto($line, 0);
-		$win->erasech($total_width);
 	}
 }
 
 =head2 char_for_value
 
-Returns the character corresponding to the given data value.
+Returns the character code corresponding to the given data value.
 
 =cut
 
@@ -262,6 +310,41 @@ sub max_value {
 	my $self = shift;
 	return $self->{max_value} if exists $self->{max_value};
 	return $self->{max_value} = max($self->data);
+}
+
+=head2 resample_mode
+
+Change method for resampling when we have more data than will fit on the graph.
+
+Current values include:
+
+=over 4
+
+=item * average - takes the average of combined values for this bucket
+
+=item * min - lowest value for this bucket
+
+=item * median - highest value for this bucket
+
+=item * max - largest value for this bucket
+
+=item * peak - alias for 'max'
+
+=back
+
+The default is 'average'.
+
+Returns $self if setting a value, or the current value.
+
+=cut
+
+sub resample_mode {
+	my $self = shift;
+	if(@_) {
+		$self->{resample_mode} = shift;
+		return $self;
+	}
+	return $self->{resample_mode} // 'average';
 }
 
 1;
