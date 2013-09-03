@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.100     2013-09-03 22:14:27 Europe/London
 	Features:
 	* Scale to fit when datapoints won't all fit in the window
 	* Switched to Tickit::RenderBuffer
