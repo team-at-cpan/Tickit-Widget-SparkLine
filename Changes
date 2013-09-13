@@ -1,4 +1,11 @@
 {{$NEXT}}
+	No new features.
+
+	Examples:
+	* Provide simple animation example (sin/cos/tan waves)
+
+	Documentation:
+	* Included animated GIF to demonstrate above example
 
 0.100     2013-09-03 22:14:27 Europe/London
 	Features:
