@@ -8,7 +8,7 @@ use Scalar::Util qw(reftype);
 use List::Util qw(max sum min);
 use Tickit::Utils qw(textwidth);
 
-our $VERSION = '0.101';
+our $VERSION = '0.102';
 
 =head1 NAME
 
@@ -32,12 +32,20 @@ Generates a mini ("sparkline") graph.
 
 =end HTML
 
+=head1 STYLE
+
+Set the base style background/foreground to determine the graph colours.
+Note that reverse video and bold don't work very well on some terminals,
+since the background+foreground colours won't match.
+
 =cut
 
 use Tickit::Style;
 
-style_definition base =>
-	fg => 'white';
+BEGIN {
+	style_definition base =>
+		fg => 'white';
+}
 
 =head1 METHODS
 
@@ -45,7 +53,10 @@ style_definition base =>
 
 sub lines { 1 }
 
-sub cols { 1 }
+sub cols {
+	my $self = shift;
+	scalar @{$self->{data}}
+}
 
 =head2 new
 
@@ -278,7 +289,10 @@ sub render_to_rb {
 	my $x = 0;
 	my $range = $#{$self->graph_steps};
 	my $fg_pen = $self->get_style_pen;
-	my $bg_pen = Tickit::Pen->new(bg => $fg_pen->getattr('fg'));
+	my $bg_pen = Tickit::Pen->new(
+		bg => $fg_pen->getattr('fg'),
+		map {; $_ => $fg_pen->getattr($_) } qw(rv b)
+	);
 	foreach my $item (@data) {
 		my $v = $item * $win_height / $self->max_value;
 		my $top = $win_height - floor( $v);

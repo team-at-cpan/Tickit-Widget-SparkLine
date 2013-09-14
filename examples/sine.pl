@@ -12,13 +12,13 @@ VBox {
 	spacing: 1;
 }
 SparkLine.sin {
-fg: 22;
+fg: 'red';
 }
 SparkLine.cos {
-fg: 157;
+fg: 'green';
 }
 SparkLine.tan {
-fg: 'red';
+fg: 'blue';
 b: 1;
 }
 EOF

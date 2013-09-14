@@ -1,4 +1,13 @@
 {{$NEXT}}
+	No new features.
+
+	Bug fixes:
+	* Return number of datapoints as cols
+	* Keep rv/b attributes for background pen (used for rendering the
+	full bars)
+
+	Documentation:
+	* Add some info about styling and a warning regarding b/rv settings.
 
 0.101     2013-09-13 23:22:40 Europe/London
 	No new features.
