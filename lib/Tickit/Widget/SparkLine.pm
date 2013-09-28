@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use parent qw(Tickit::Widget);
 
-our $VERSION = '0.102';
+our $VERSION = '0.103';
 
 =head1 NAME
 
