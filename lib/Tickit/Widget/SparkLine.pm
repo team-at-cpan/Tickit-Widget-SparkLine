@@ -3,10 +3,6 @@ package Tickit::Widget::SparkLine;
 use strict;
 use warnings;
 use parent qw(Tickit::Widget);
-use POSIX qw(floor);
-use Scalar::Util qw(reftype);
-use List::Util qw(max sum min);
-use Tickit::Utils qw(textwidth);
 
 our $VERSION = '0.102';
 
@@ -40,6 +36,10 @@ since the background+foreground colours won't match.
 
 =cut
 
+use POSIX qw(floor);
+use Scalar::Util qw(reftype);
+use List::Util qw(max sum min);
+use Tickit::Utils qw(textwidth);
 use Tickit::Style;
 
 BEGIN {
