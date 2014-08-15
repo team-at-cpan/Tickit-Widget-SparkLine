@@ -262,7 +262,7 @@ sub resample {
 	@out;
 }
 
-=head2 render
+=head2 render_to_rb
 
 Rendering implementation. Uses L</graph_steps> as the base character set.
 
@@ -373,9 +373,9 @@ __END__
 
 =head1 AUTHOR
 
-Tom Molesworth <cpan@entitymodel.com>
+Tom Molesworth <cpan@perlsite.co.uk>
 
 =head1 LICENSE
 
-Copyright Tom Molesworth 2011-2013. Licensed under the same terms as Perl itself.
+Copyright Tom Molesworth 2011-2014. Licensed under the same terms as Perl itself.
 
