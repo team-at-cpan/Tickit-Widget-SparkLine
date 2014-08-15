@@ -33,12 +33,12 @@ for my $func (qw(sin cos tan)) {
 	my $code;
 	my $f = CORE->can($func) ? \&{'CORE::' . $func} : \&{'POSIX::' . $func};
 	$code = sub {
-		$w->shift;
 		# Chosen to give ~5s animation time
 		$ph += PI / 25;
-		my $v = do { no strict 'refs'; $f->($ph); };
+		my $v = do { no strict 'refs'; 4 * $f->($ph); };
 		$v = 4 if $v > 4;
 		$v = -4 if $v < -4;
+		$w->shift;
 		$w->push(4 + $v);
 		$tickit->timer(after => 0.10, $code);
 	};
