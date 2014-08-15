@@ -1,4 +1,8 @@
 {{$NEXT}}
+	No new features.
+
+	Dependency fixes:
+	* Add Tickit::Widget and parent
 
 0.103     2013-09-28 20:09:02 Europe/London
 	No new features.
